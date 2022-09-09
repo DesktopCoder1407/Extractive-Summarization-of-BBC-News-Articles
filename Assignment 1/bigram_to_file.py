@@ -21,7 +21,7 @@ for gram in types:
     bigrams[gram] = {}
     for given_gram in types:
         # Store bigrams as a string fraction (just for displaying).
-        bigrams[gram][given_gram] = f'''{len(re.findall(f'{given_gram if given_gram != "." else true_period} ?{gram if gram != "." else true_period}', text))}/{types[given_gram]}'''
+        bigrams[gram][given_gram] = str(len(re.findall(fr'(?:\s|^){given_gram if given_gram != "." else true_period} ?{gram if gram != "." else true_period}\s', text))) + "/" + str(types[given_gram])
 
 # Begin the output text that will be written to the file, in the format "P({gram}|{given_gram}) = {fraction},  "
 output_text = ''
