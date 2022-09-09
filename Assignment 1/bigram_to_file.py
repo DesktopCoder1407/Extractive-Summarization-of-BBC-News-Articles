@@ -1,11 +1,11 @@
 import re
 
 # Training text for the bigram model.
-text = "the day was grey and bitter cold, and the dogs would not take the scent. the big black bitch had taken one " \
-       "sniff at the bear tracks, backed off, and skulked back to the pack with her tail between her legs."
+text = "<s> the day was grey and bitter cold, and the dogs would not take the scent. the big black bitch had taken one " \
+       "sniff at the bear tracks, backed off, and skulked back to the pack with her tail between her legs. </s>"
 
 # Get all the tokens from the training text and find all the unique types (and number them).
-tokens = re.findall(r'''\b\w+?\b|\.|,''', text)
+tokens = re.findall(r'''</?\w+?>|\b\w+?\b|\.|,''', text)
 types = {}
 for token in tokens:
     if types.get(token) is None:
@@ -28,7 +28,7 @@ output_text = ''
 for gram in types:
     for given_gram in types:
         output_text += f'P({gram}|{given_gram}) = {bigrams[gram][given_gram]},  '
-    output_text += '\r\r'
+    output_text = output_text[:-3] + '\r\r'
 
 # Write to file
 file = open('output_bigram.txt', 'wt')
