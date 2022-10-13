@@ -1,21 +1,35 @@
 import os
+import glob
+#import spacey
 import nltk
 from nltk.tokenize import sent_tokenize, word_tokenize
 nltk.download('punkt')
 
-root_directory = 'data/raw_articles/'
-
 
 def directory_file_count():
-    print('File Count:')
-    for sub_directory in os.listdir(root_directory):
-        print(sub_directory)
-        file_count = 0
-        for filename in os.listdir(os.path.join(root_directory, sub_directory)):
-            file_count += 1
-        print(file_count)
+    file_list = glob.glob('data\\raw_articles\\*\\*.txt')
+    return f'File Count: {len(file_list)}'
 
 
+def get_corpus():
+    file_list = glob.glob('data\\raw_articles\\*\\*.txt')
+    corpus = ''''''
+    for file in file_list:
+        with open(file, 'rt') as file_in:
+            corpus += file_in.read()
+    return corpus
+
+
+def get_corpus_split():
+    file_list = glob.glob('data\\raw_articles\\*\\')
+    corpus = []
+    for sub_folder in file_list:
+        for file in glob.glob(sub_folder + '*.txt'):
+            with open(file, 'rt') as file_in:
+                corpus.append(file_in.read())
+    return corpus
+
+#WORK ON FROM HERE DOWN
 def directory_sentences_count():
     print('Sentences Count:')
     total_count = 0
