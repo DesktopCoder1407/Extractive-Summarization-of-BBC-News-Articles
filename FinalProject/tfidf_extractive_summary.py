@@ -1,7 +1,6 @@
 import glob
-import nltk
-import numpy
 import regex as re
+from segment_sentences import segment_sentences
 from sklearn.feature_extraction.text import TfidfVectorizer
 
 
@@ -24,17 +23,10 @@ def main():
         print(get_score(vect, text)[i][1])
 
 
-# TODO: Separate sentence segemntation into a different function in a different file. (segmentation is from lines 32 to 37)
 def get_score(vectorizer, document):
-    title = document[0:document.find('\n')]
-    # title_score = 0
-
-    paragraphs = re.split(r'\n+', document)
-    sentences = []
     scores = []
 
-    for paragraph in paragraphs:
-        sentences.extend(nltk.sent_tokenize(paragraph))
+    title, sentences = segment_sentences(document, True)
 
     for sentence in sentences:
         score = 0
