@@ -1,10 +1,12 @@
+# TOKENIZER REGEX: r"\S?\d+[.,]\d+\w+|[^ \n,.]+"
+# PARAGRAPH REGEX: r".+"
+# SENTENCE REGEX: r"[^ \n].+?\.(?!\d)"
+
 import tfidf_summary
-import en_core_web_sm
 from glob import glob
 import random as rand
 
 rand.seed(0)
-nlp = en_core_web_sm.load()
 
 def main():
     # The Corpus (List of all documents) and the text to be summarized (single document from corpus currently)
@@ -16,20 +18,19 @@ def main():
     # Randomly shuffle the corpus (With given seed for consistency)
     #rand.shuffle(corpus)
 
-    # Grab the text from the corpus and create a spacy Doc object.
+    # Grab the title and text from the corpus.
     #text = corpus[rand.randint(0, len(corpus))]
     title, text = corpus[0].split('\n', maxsplit=1)
-    text = text.replace('\n', '')
-    doc = nlp(text)
+    # text = text.replace('\n', '')
 
     # Select the 6 highest scores as the selected summarization sentences.
     # Scoring method is tf_idf score divided by the number of words in the sentence.
-    text = ""
-    for sentence in tfidf_summary.score_sentences(corpus, doc, 6):
-        text += sentence + " "
+    summarized_text = ''
+    for sentence in tfidf_summary.score_sentences(corpus, text, 6):
+        summarized_text += sentence + ' '
     
     print(title + "\n---")
-    print(text[:-1])
+    print(summarized_text[:-1])
 
 if __name__ == "__main__":
     main()

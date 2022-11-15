@@ -1,22 +1,22 @@
 import re
 from sklearn.feature_extraction.text import TfidfVectorizer
 
-def score_sentences(corpus, doc, n):
+def score_sentences(corpus, text, n):
     scored_sentences = []
 
     # Create the Tfidf vectorizer and fit the corpus to the vectorizer.
-    vect = TfidfVectorizer(token_pattern=r"\$?\d*\.?\d+|\b\w\w+\b|\b[IiAa]\b")
+    vect = TfidfVectorizer(token_pattern=r"\S?\d+[.,]\d+\w+|[^ \n,.]+")
     vect = vect.fit(corpus)
     
     # Iterates through each sentence, getting the tf_idf score for each word and finding the average tf_idf score
     # to use as the score value for the sentence.
-    for i, sentence in enumerate(doc.sents):
+    for i, sentence in enumerate(re.findall(r"[^ \n].+?\.(?!\d)", text)):
         score = 0
         word_count = 0
-        for word in re.findall(r"\$?\d*\.?\d+|\b\w\w+\b|\b[IiAa]\b", str(sentence)):
+        for word in re.findall(r"\S?\d+[.,]\d+\w+|[^ \n,.]+", sentence):
             score += vect.vocabulary_[word.lower()]
             word_count += 1
-        scored_sentences.append((score / word_count, (i, str(sentence)))) if word_count > 0 else scored_sentences
+        scored_sentences.append((score / word_count, (i, sentence)))
 
     # Sort the sentences by their scores (Highest to lowest) and select the top n.
     scored_sentences.sort(reverse=True)
