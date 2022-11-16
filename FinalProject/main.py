@@ -9,7 +9,10 @@ def main():
     #corpus = [open(x, encoding='windows-1252').read() for x in glob('data/raw_articles/*/*.txt')]
     corpus_path = glob('data/raw_articles/business/*.txt')
     corpus_path.sort()
+    gold_corpus_path = glob('data/summarized_articles/business/*.txt')
+    gold_corpus_path.sort()
     corpus = [open(x, encoding='windows-1252').read() for x in corpus_path]
+    gold_corpus = [open(x, encoding='windows-1252').read() for x in gold_corpus_path]
 
     # Randomly shuffle the corpus (With given seed for consistency)
     #rand.shuffle(corpus)

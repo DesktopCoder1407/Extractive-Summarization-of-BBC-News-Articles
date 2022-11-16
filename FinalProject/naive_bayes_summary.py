@@ -1,42 +1,54 @@
+# Possible Other Vector: Fixed Phrase: Sentence contains a phrase that is prespecified.
 from glob import glob
 import numpy
 import tokenizer
 from sklearn.naive_bayes import CategoricalNB
+from sklearn.model_selection import train_test_split
 
 def main():
-    corpus_path = glob('data/raw_articles/business/*.txt')
-    corpus_path.sort()
-    corpus_y_path = glob('data/summarized_articles/business/*.txt')
-    corpus_y_path.sort()
+    corpus_path = glob('data/raw_articles/*/*.txt')
+    corpus_y_path = glob('data/summarized_articles/*/*.txt')
 
     corpus = [open(x, encoding='windows-1252').read() for x in corpus_path]
-    corpus_y = [open(x, encoding='windows-1252').read() for x in corpus_y_path]
-
-    print(get_training_vector(corpus, corpus_y))
-    exit()
-
-    # doc = corpus[0]
-    # doc_y = corpus_y[0]
-
-    # vector = doc_to_feature_vector(doc, doc_y)
-
-    # print(numpy.array(vector)[3,0])
-    # exit()
-
-    vector_only = numpy.array([x[0] for x in vector])
+    gold_corpus = [open(x, encoding='windows-1252').read() for x in corpus_y_path]
+    train_corpus, test_corpus, train_gold_corpus, test_gold_corpus = train_test_split(corpus, gold_corpus, test_size=0.1, random_state=0)
 
     classifier = CategoricalNB()
-    classifier.fit(vector_only[:, :-1], vector_only[:, -1])
+
+    training_vector = get_vector(train_corpus, train_gold_corpus)
+    classifier.fit(training_vector[:, :-1], training_vector[:, -1])
+
+    testing_vector = get_vector(test_corpus, test_gold_corpus)
+
+    print('Mean training accuracy for the classifier: ')
+    print(classifier.score(training_vector[:, :-1], training_vector[:, -1]))
+    print('Mean testing accuracy for the classifier: ')
+    print(classifier.score(testing_vector[:, :-1], testing_vector[:, -1]))
+
+def score_sentences(corpus, gold_corpus, text, n = 0):
+    chosen_sentences = []
+    classifier = CategoricalNB()
+
+    training_vector = get_vector(corpus, gold_corpus)
+    classifier.fit(training_vector[:, :-1], training_vector[:, -1])
+
+    testing_vector = get_vector([text], [text])[:, :-1]
+    if n == 0: # Select sentences chosen by the classifier.
+        for sent, pred in zip(tokenizer.sentencize(text), classifier.predict(testing_vector)):
+            if pred == 1:
+                chosen_sentences.append(sent)
+    else: # Select top n sentences.
+        pred = list(zip(classifier.predict_log_proba(testing_vector)[:, 1], zip(range(len(tokenizer.sentencize(text))), tokenizer.sentencize(text))))
+        pred.sort(reverse=True)
+        pred = pred[:6]
+        pred = [x[1] for x in pred]
+        pred.sort()
+        for i, sent in pred:
+            chosen_sentences.append(sent)
     
-    for t, p in zip(numpy.array(vector)[0:20,2], classifier.predict(vector_only[0:20, :-1])):
-        if p == 1:
-            print(t)
-    # print(numpy.array(vector)[0:20,2])
-    # print(classifier.predict(vector_only[0:20, :-1]))
+    return chosen_sentences
 
-    # print(classifier.score(vector_only[:, :-1], vector_only[:, -1]))
-
-def get_training_vector(corpus, gold_corpus):
+def get_vector(corpus, gold_corpus):
     # Training Vector. Format: [SentenceLength, ParagraphLocation, SimilarityToTitle, UppercaseWords, CATEGORY]
     vector = []
 
@@ -117,5 +129,3 @@ def get_category(sentence, sentencized_summary):
 
 if __name__ == "__main__":
     main()
-
-# ?Fixed Phrase: Sentence contains a phrase that is prespecified.
