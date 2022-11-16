@@ -1,5 +1,6 @@
 import tfidf_summary
 import naive_bayes_summary
+import tokenizer
 from glob import glob
 
 def main():
@@ -12,7 +13,6 @@ def main():
     gold_corpus = [open(x, encoding='windows-1252').read() for x in gold_corpus_path]
 
     # TODO: Make a train-test split to have a training corpus (train naive_bayes/update weights for tfidf) and a testing corpus (get rogue score)
-    # TODO: Setup ROGUE-1, ROGUE-2 (Maybe 3?)
     # TODO: Below is all output. Probably keep for neatness sake.
     
     # Grab the title and text from the corpus.
@@ -35,6 +35,34 @@ def main():
     print('NAIVE BAYES:')
     print(title + "\n---")
     print(summarized_text[:-1])
+
+def rouge(summary: str, gold_summary: str, n: int):
+    summary_tokens = tokenizer.tokenize(summary)
+    gold_summary_tokens = tokenizer.tokenize(gold_summary)
+    summary_n_grams = []
+    gold_summary_n_grams = []
+
+    # Create n_grams for summary
+    for i in range(len(summary_tokens) - (n-1)):
+        summary_n_grams.append(summary_tokens[i])
+        for j in range(1, n):
+            summary_n_grams[i] += ' ' + summary_tokens[i + j]
+    
+    # Create n_grams for gold_summary
+    for i in range(len(gold_summary_tokens) - (n-1)):
+        gold_summary_n_grams.append(gold_summary_tokens[i])
+        for j in range(1, n):
+            gold_summary_n_grams[i] += ' ' + gold_summary_tokens[i + j]
+    
+    # Find overlapping n_grams and calculate recall and precision
+    overlapping = 0
+    for gram in summary_n_grams:
+        if gram in gold_summary_n_grams:
+            overlapping += 1
+    recall = overlapping / len(gold_summary_n_grams)
+    precision = overlapping / len(summary_n_grams)
+
+    return (recall, precision)
 
 if __name__ == "__main__":
     main()
