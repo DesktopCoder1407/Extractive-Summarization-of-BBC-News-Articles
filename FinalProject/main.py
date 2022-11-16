@@ -1,9 +1,11 @@
 import tfidf_summary
 import naive_bayes_summary
 import tokenizer
+
 from glob import glob
 import numpy
 from sklearn.model_selection import train_test_split
+import time
 
 def main():
     # The Corpus (List of all documents) and Gold Corpus (list of all reference summarized documents).
@@ -16,16 +18,27 @@ def main():
     train_corpus, test_corpus, train_gold_corpus, test_gold_corpus = train_test_split(corpus, gold_corpus, test_size=0.1, random_state=0)
 
     # Summarized training data
+    start_time = time.time()
     tfidf_summarized = tfidf_summary.score_corpus(corpus, test_corpus, 6)
+    tfidf_train_time = time.time() - start_time
+
+    start_time = time.time()
     naive_bayes_summarized = naive_bayes_summary.score_corpus(train_corpus, train_gold_corpus, test_corpus, 6)
+    naive_bayes_train_time = time.time() - start_time
     
     # ROUGE-1 and ROUGE-2 scores for the TF-IDF Summarizer. Includes Recall, Precision, and F1-Score.
-    tfidf_rouge = numpy.zeros((len(tfidf_summarized), 2, 2))
+    tfidf_rouge = numpy.zeros((len(tfidf_summarized), 2, 3))
     for i in range(len(tfidf_summarized)):
         tfidf_rouge[i, :, 0] = rouge(tfidf_summarized[i], test_gold_corpus[i], 1)
         tfidf_rouge[i, :, 1] = rouge(tfidf_summarized[i], test_gold_corpus[i], 2)
+        tfidf_rouge[i, :, 2] = rouge(tfidf_summarized[i], test_gold_corpus[i], 3)
     
     r_avg = numpy.average(tfidf_rouge, axis=0) # Average out the rouge data to get a single rouge score.
+
+    # Outputs:
+    print('---TF-IDF---')
+    print(f'TF-IDF Training Time: {tfidf_train_time:.2f} seconds')
+    print()
     print(f'TF-IDF ROUGE-1 Recall: {r_avg[0, 0]:.4f}')
     print(f'TF-IDF ROUGE-1 Precision: {r_avg[1, 0]:.4f}')
     print(f'TF-IDF ROUGE-1 F1-Score: {(2*r_avg[1, 0]*r_avg[0, 0])/(r_avg[1, 0]+r_avg[0, 0]):.4f}')
@@ -34,14 +47,24 @@ def main():
     print(f'TF-IDF ROUGE-2 Precision: {r_avg[1, 1]:.4f}')
     print(f'TF-IDF ROUGE-2 F1-Score: {(2*r_avg[1, 1]*r_avg[0, 1])/(r_avg[1, 1]+r_avg[0, 1]):.4f}')
     print()
+    print(f'TF-IDF ROUGE-3 Recall: {r_avg[0, 2]:.4f}')
+    print(f'TF-IDF ROUGE-3 Precision: {r_avg[1, 2]:.4f}')
+    print(f'TF-IDF ROUGE-3 F1-Score: {(2*r_avg[1, 2]*r_avg[0, 2])/(r_avg[1, 2]+r_avg[0, 2]):.4f}')
+    print()
 
     # ROUGE-1 and ROUGE-2 scores for the Naive Bayes Summarizer. Includes Recall, Precision, and F1-Score.
-    naive_bayes_rouge = numpy.zeros((len(naive_bayes_summarized), 2, 2))
+    naive_bayes_rouge = numpy.zeros((len(naive_bayes_summarized), 2, 3))
     for i in range(len(naive_bayes_summarized)):
         naive_bayes_rouge[i, :, 0] = rouge(naive_bayes_summarized[i], test_gold_corpus[i], 1)
         naive_bayes_rouge[i, :, 1] = rouge(naive_bayes_summarized[i], test_gold_corpus[i], 2)
+        naive_bayes_rouge[i, :, 2] = rouge(naive_bayes_summarized[i], test_gold_corpus[i], 3)
     
     r_avg = numpy.average(naive_bayes_rouge, axis=0) # Average out the rouge data to get a single rouge score.
+
+    # Outputs:
+    print('---Naive Bayes---')
+    print(f'Naive Bayes Training Time: {naive_bayes_train_time:.2f} seconds')
+    print()
     print(f'Naive Bayes ROUGE-1 Recall: {r_avg[0, 0]:.4f}')
     print(f'Naive Bayes ROUGE-1 Precision: {r_avg[1, 0]:.4f}')
     print(f'Naive Bayes ROUGE-1 F1-Score: {(2*r_avg[1, 0]*r_avg[0, 0])/(r_avg[1, 0]+r_avg[0, 0]):.4f}')
@@ -50,8 +73,10 @@ def main():
     print(f'Naive Bayes ROUGE-2 Precision: {r_avg[1, 1]:.4f}')
     print(f'Naive Bayes ROUGE-2 F1-Score: {(2*r_avg[1, 1]*r_avg[0, 1])/(r_avg[1, 1]+r_avg[0, 1]):.4f}')
     print()
-
-    # TODO: Time TF-IDF vs Naive Bayes to display in paper.
+    print(f'Naive Bayes ROUGE-3 Recall: {r_avg[0, 2]:.4f}')
+    print(f'Naive Bayes ROUGE-3 Precision: {r_avg[1, 2]:.4f}')
+    print(f'Naive Bayes ROUGE-3 F1-Score: {(2*r_avg[1, 2]*r_avg[0, 2])/(r_avg[1, 2]+r_avg[0, 2]):.4f}')
+    print()
     
     # An example summarization for each model.
     print("Example summaries grabbed from the test corpus:")

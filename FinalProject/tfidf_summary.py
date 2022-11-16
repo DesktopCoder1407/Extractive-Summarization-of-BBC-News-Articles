@@ -6,7 +6,7 @@ def score_sentences(corpus: list[str], text: str, n: int, vect:TfidfVectorizer|N
 
     # Create the Tfidf vectorizer and fit the corpus to the vectorizer.
     if vect is None:
-        vect = TfidfVectorizer(tokenizer=tokenizer.tokenize)
+        vect = TfidfVectorizer(token_pattern=r"\S?\d+[.,]\d+\w+|[^ \n,.]+")
         vect = vect.fit(corpus)
     
     # Iterates through each sentence, getting the tf_idf score for each word and finding the average tf_idf score
@@ -32,7 +32,7 @@ def score_corpus(training_corpus: list[str], testing_corpus: list[str], n: int):
     summaries = []
 
     # Create the Tfidf vectorizer and fit the corpus to the vectorizer.
-    vect = TfidfVectorizer(tokenizer=tokenizer.tokenize)
+    vect = TfidfVectorizer(token_pattern=r"\S?\d+[.,]\d+\w+|[^ \n,.]+")
     vect = vect.fit(training_corpus)
 
     # Summarize each document within the testing corpus.
