@@ -1,7 +1,3 @@
-# TOKENIZER REGEX: r"\S?\d+[.,]\d+\w+|[^ \n,.]+"
-# PARAGRAPH REGEX: r".+"
-# SENTENCE REGEX: r"[^ \n].+?\.(?!\d)"
-
 import tfidf_summary
 from glob import glob
 import random as rand

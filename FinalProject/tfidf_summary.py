@@ -1,4 +1,4 @@
-import re
+import tokenizer
 from sklearn.feature_extraction.text import TfidfVectorizer
 
 def score_sentences(corpus, text, n):
@@ -10,10 +10,10 @@ def score_sentences(corpus, text, n):
     
     # Iterates through each sentence, getting the tf_idf score for each word and finding the average tf_idf score
     # to use as the score value for the sentence.
-    for i, sentence in enumerate(re.findall(r"[^ \n].+?\.(?!\d)", text)):
+    for i, sentence in enumerate(tokenizer.sentencize(text)):
         score = 0
         word_count = 0
-        for word in re.findall(r"\S?\d+[.,]\d+\w+|[^ \n,.]+", sentence):
+        for word in tokenizer.tokenize(sentence):
             score += vect.vocabulary_[word.lower()]
             word_count += 1
         scored_sentences.append((score / word_count, (i, sentence)))
