@@ -25,12 +25,14 @@ def main():
     print('Mean testing accuracy for the classifier: ')
     print(classifier.score(testing_vector[:, :-1], testing_vector[:, -1]))
 
-def score_sentences(corpus, gold_corpus, text, n = 0):
+def score_sentences(corpus: list[str], gold_corpus: list[str], text: str, n: int = 0, classifier: CategoricalNB | None = None):
     chosen_sentences = []
-    classifier = CategoricalNB()
 
-    training_vector = get_vector(corpus, gold_corpus)
-    classifier.fit(training_vector[:, :-1], training_vector[:, -1])
+    # Create the classifier and fit the corpus to the classifier.
+    if classifier is None:
+        classifier = CategoricalNB()
+        training_vector = get_vector(corpus, gold_corpus)
+        classifier.fit(training_vector[:, :-1], training_vector[:, -1])
 
     testing_vector = get_vector([text], [text])[:, :-1]
     if n == 0: # Select sentences chosen by the classifier.
@@ -40,13 +42,30 @@ def score_sentences(corpus, gold_corpus, text, n = 0):
     else: # Select top n sentences.
         pred = list(zip(classifier.predict_log_proba(testing_vector)[:, 1], zip(range(len(tokenizer.sentencize(text))), tokenizer.sentencize(text))))
         pred.sort(reverse=True)
-        pred = pred[:6]
+        pred = pred[:n]
         pred = [x[1] for x in pred]
         pred.sort()
         for i, sent in pred:
             chosen_sentences.append(sent)
     
     return chosen_sentences
+
+def score_corpus(training_corpus: list[str], training_gold_corpus: list[str], testing_corpus: list[str], n: int = 0):
+    summaries = []
+
+    # Create the classifier and fit the corpus to the classifier.
+    classifier = CategoricalNB()
+    training_vector = get_vector(training_corpus, training_gold_corpus)
+    classifier.fit(training_vector[:, :-1], training_vector[:, -1])
+    
+    # Summarize each document within the testing corpus.
+    for doc in testing_corpus:
+        doc_summary = ''
+        for sentence in score_sentences(testing_corpus, testing_corpus, doc, n, classifier):
+            doc_summary += sentence + ' '
+        summaries.append(doc_summary[:-1])
+
+    return summaries
 
 def get_vector(corpus, gold_corpus):
     # Training Vector. Format: [SentenceLength, ParagraphLocation, SimilarityToTitle, UppercaseWords, CATEGORY]
